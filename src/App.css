@@ -1,0 +1,28 @@
+* {
+    margin: 0;
+    font-family: Main;
+}
+
+body {
+    background-color: #191919;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex_col {
+    flex-direction: column;
+}
+
+.items_center {
+    align-items: center;
+}
+
+.justify_center {
+    justify-content: center;
+}
+
+.hscreen {
+    height: 100vh;
+}
