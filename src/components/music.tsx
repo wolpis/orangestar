@@ -1,19 +1,31 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Assets } from "../utils/assets";
 import { FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { IoPlaySkipBack, IoPlaySkipForward } from "react-icons/io5";
+import { Playhandle, handlePlay, handleSTOP } from "../utils/music";
 
 export const MusicComponent = () => {
     const [play_id, SetPI] = useState(0);
     const [playing, SetPlaying] = useState(true);
-    let [fade, setFade] = useState('')
+    let [fade, setFade] = useState('');
 
+    const audioElement:React.MutableRefObject<any> = useRef();
+    const [time, SetTime] = useState(0);
     useEffect(() => {
-        setTimeout(()=>{ setFade('end') }, 100)
-        return ()=>{
-            setFade('')
-        }
-    }, [play_id])
+        setTimeout(() => setFade('end'), 100);
+
+        const audio = Playhandle(audioElement, Assets[play_id].name)
+        console.log(audio)
+        console.log(audio.currentTime)
+        // 현재 버그 : 오디오 출력
+        return () => {
+            setFade('');
+        };
+    }, [play_id]);
+
+    // useEffect(() => {
+    //     console.log(time);
+    // }, [time])
     
     return (
         <div className={"container flex items_center justify_center h_screen start " + fade} style={{
@@ -43,6 +55,7 @@ export const MusicComponent = () => {
                         textAlign: "center"
                     }}>{Assets[play_id].title}</h1>
                     <p style={{marginTop: "7px", textShadow: "0px 0px 10px black",}}>Cover. {Assets[play_id].cover}</p>
+                    {time}
                     <div className="flex" style={{marginTop: "30%", justifyContent: "space-between", width: "50%"}}>
                         <h1 style={{fontSize: "2.5em", cursor: "pointer", textShadow: "0px 0px 20px black"}} onClick={() => {
                             if (play_id === 0) {
@@ -54,7 +67,13 @@ export const MusicComponent = () => {
                         }}><IoPlaySkipBack title="이전 곡"/></h1>
                         <h1 style={{fontSize: "2.5em", cursor: "pointer"}} onClick={() => {
                             SetPlaying(!playing)
-                        }}>{playing ? <FaCirclePlay/> : <FaCirclePause/>}</h1>
+                            if (!playing) {
+                                handlePlay(audioElement);
+                                
+                            } else {
+                                handleSTOP(audioElement);
+                            }
+                        }}>{playing ? <FaCirclePause/> : <FaCirclePlay/>}</h1>
                         <h1 style={{fontSize: "2.5em", cursor: "pointer"}} onClick={() => {
                             if (play_id === Assets.length - 1) {
                                 SetPI(0);
@@ -62,7 +81,7 @@ export const MusicComponent = () => {
                                 SetPI(play_id + 1);
                             }
                             SetPlaying(true);
-                        }}><IoPlaySkipForward/></h1>
+                        }}><IoPlaySkipForward title="다음 곡"/></h1>
                     </div>
                 </div>  
             </div>
