@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 
 export const Playhandle = (audioElement: React.MutableRefObject<any>, ogg_name: string) => {
     // AudioContext 생성
@@ -120,7 +121,9 @@ export const Playhandle = (audioElement: React.MutableRefObject<any>, ogg_name: 
 
     // 오디오 파일 설정
     audioElement.current.load();
+    audioElement.current.currentTime = 87.200;
     audioElement.current.oncanplaythrough = function () {
+        
         audioElement.current.play();
     };
     return audioContext
@@ -131,6 +134,9 @@ export const Playhandle = (audioElement: React.MutableRefObject<any>, ogg_name: 
 export const handleSTOP = (audioElement: React.MutableRefObject<any>) => {
     if (audioElement.current) {
         audioElement.current.pause();
+        audioElement.current.onpause = () => {
+            // 노래가 멈추면서 currentTime을 그대로 유지
+        };
     }
 };
 

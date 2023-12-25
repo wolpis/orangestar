@@ -1,32 +1,56 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Assets } from "../utils/assets";
 import { FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { IoPlaySkipBack, IoPlaySkipForward } from "react-icons/io5";
 import { Playhandle, handlePlay, handleSTOP } from "../utils/music";
+import Surges from "../utils/srt";
 
 export const MusicComponent = () => {
     const [play_id, SetPI] = useState(0);
     const [playing, SetPlaying] = useState(true);
-    let [fade, setFade] = useState('');
+    const [fade, setFade] = useState('');
 
-    const audioElement:React.MutableRefObject<any> = useRef();
+    const audioElement = useRef<any>();
     const [time, SetTime] = useState(0);
+    const [audio_, SetAudio] = useState<AudioContext>();
+    const [lyric_, SetLyric] = useState({ time: 0, ko_msg: "", jp_msg: "" });
+
     useEffect(() => {
         setTimeout(() => setFade('end'), 100);
 
-        const audio = Playhandle(audioElement, Assets[play_id].name)
-        console.log(audio)
-        console.log(audio.currentTime)
-        // 현재 버그 : 오디오 출력
+        const audio = Playhandle(audioElement, Assets[play_id].name);
+        SetAudio(audio);
+
+        setTimeout(() => {
+            SetTime(audio.currentTime * 1000);
+        }, 500);
+
         return () => {
             setFade('');
         };
     }, [play_id]);
 
-    // useEffect(() => {
-    //     console.log(time);
-    // }, [time])
-    
+    useMemo(() => {
+        console.log(time)
+        if (audio_) {
+            if (playing) {
+                const currentLyric = Surges.find((lyric, index) => {
+                    const nextLyricTime = Surges[index + 1] ? Surges[index + 1].time : Infinity;
+                    return lyric.time <= time && time < nextLyricTime;
+                });
+
+                if (currentLyric) {
+                    SetLyric(currentLyric);
+                }
+
+                setTimeout(() => {
+                    if (playing) {SetTime(audioElement.current.currentTime * 1000);}
+                }, 100);
+            }
+        }
+    }, [audio_, playing, time]);
+
+
     return (
         <div className={"container flex items_center justify_center h_screen start " + fade} style={{
             backgroundImage: `url(/background/${Assets[play_id].name}.${Assets[play_id].type})`
@@ -43,20 +67,31 @@ export const MusicComponent = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex flex_col items_center" style={{
+                <div className="flex flex_col items_center itembetween" style={{
                     color: "white",
                     margin: "10px",
                     width: "500px"
                 }}>
-                    <h1 style={{
-                        color: "white",
-                        textShadow: "0px 0px 20px black",
-                        fontSize: "1.5em",
-                        textAlign: "center"
-                    }}>{Assets[play_id].title}</h1>
-                    <p style={{marginTop: "7px", textShadow: "0px 0px 10px black",}}>Cover. {Assets[play_id].cover}</p>
-                    {time}
-                    <div className="flex" style={{marginTop: "30%", justifyContent: "space-between", width: "50%"}}>
+                    <div style={{textAlign: "center"}}>
+                        <h1 style={{
+                            color: "white",
+                            textShadow: "0px 0px 20px black",
+                            fontSize: "1.5em",
+                            textAlign: "center"
+                        }}>{Assets[play_id].title}</h1>
+                        <p style={{marginTop: "7px", textShadow: "0px 0px 10px black",}}>Cover. {Assets[play_id].cover}</p>
+                    </div>
+                    
+                    
+
+
+                    <div style={{textAlign: "center", marginTop: "10px", marginBottom: "20px"}}>
+                        <h3>{lyric_?.jp_msg}</h3>
+                        <p>{lyric_?.ko_msg}</p>
+                    </div>
+                    
+
+                    <div className="flex" style={{justifyContent: "space-between", width: "50%"}}>
                         <h1 style={{fontSize: "2.5em", cursor: "pointer", textShadow: "0px 0px 20px black"}} onClick={() => {
                             if (play_id === 0) {
                                 SetPI(Assets.length - 1);
@@ -71,6 +106,7 @@ export const MusicComponent = () => {
                                 handlePlay(audioElement);
                                 
                             } else {
+                                audioElement.current.pause();
                                 handleSTOP(audioElement);
                             }
                         }}>{playing ? <FaCirclePause/> : <FaCirclePlay/>}</h1>
