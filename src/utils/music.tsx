@@ -121,7 +121,7 @@ export const Playhandle = (audioElement: React.MutableRefObject<any>, ogg_name: 
 
     // 오디오 파일 설정
     audioElement.current.load();
-    audioElement.current.currentTime = 87.200;
+    // audioElement.current.currentTime = 87.200;
     audioElement.current.oncanplaythrough = function () {
         
         audioElement.current.play();

@@ -3,7 +3,7 @@ import { Assets } from "../utils/assets";
 import { FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { IoPlaySkipBack, IoPlaySkipForward } from "react-icons/io5";
 import { Playhandle, handlePlay, handleSTOP } from "../utils/music";
-import Surges from "../utils/srt";
+import { LyricAssets } from "../utils/srt/init";
 
 export const MusicComponent = () => {
     const [play_id, SetPI] = useState(0);
@@ -14,13 +14,14 @@ export const MusicComponent = () => {
     const [time, SetTime] = useState(0);
     const [audio_, SetAudio] = useState<AudioContext>();
     const [lyric_, SetLyric] = useState({ time: 0, ko_msg: "", jp_msg: "" });
+    const [lyricdatas, SetLD] = useState([{ time: 0, ko_msg: "", jp_msg: "" }]);
 
     useEffect(() => {
         setTimeout(() => setFade('end'), 100);
 
         const audio = Playhandle(audioElement, Assets[play_id].name);
         SetAudio(audio);
-
+        SetLD(LyricAssets(play_id))
         setTimeout(() => {
             SetTime(audio.currentTime * 1000);
         }, 500);
@@ -34,8 +35,8 @@ export const MusicComponent = () => {
         console.log(time)
         if (audio_) {
             if (playing) {
-                const currentLyric = Surges.find((lyric, index) => {
-                    const nextLyricTime = Surges[index + 1] ? Surges[index + 1].time : Infinity;
+                const currentLyric = lyricdatas.find((lyric, index) => {
+                    const nextLyricTime = lyricdatas[index + 1] ? lyricdatas[index + 1].time : Infinity;
                     return lyric.time <= time && time < nextLyricTime;
                 });
 
@@ -85,7 +86,7 @@ export const MusicComponent = () => {
                     
 
 
-                    <div style={{textAlign: "center", marginTop: "10px", marginBottom: "20px"}}>
+                    <div style={{textAlign: "center", marginTop: "10px", marginBottom: "20px", textShadow: "0px 0px 10px black"}}>
                         <h3>{lyric_?.jp_msg}</h3>
                         <p>{lyric_?.ko_msg}</p>
                     </div>

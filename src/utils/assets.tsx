@@ -16,7 +16,7 @@ export const Assets: AssetsType[] = [
         name: "daybreak",
         type: "jpg",
         title: "DAYBREAK FRONTLINE",
-        cover: "おん湯xLowFat"
+        cover: "蛇 hebi"
     },
     {
         name: "henceforth",
